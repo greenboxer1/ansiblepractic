@@ -1,0 +1,56 @@
+- name: web server
+  hosts: all
+  become: yes
+  tasks:
+    - name: create ansible-worker
+      user:
+        name: ansible-worker
+        state: present
+
+    - name: copy ssh
+      copy:
+        src: ../ssh_keys/
+        dest: /home/ansible-worker/.ssh/
+        mode: 700
+      ignore_errors: no
+
+    - name: git install
+      apt:
+        name: git
+        state: present
+
+    - name: clone rep
+      ansible.builtin.git:
+        repo: "https://github.com/iphilka/stud-template.git"
+        dest: "/home/ansible-worker/www/stud-template"
+        clone: yes
+        update: no
+
+    - name: replace index.html from rep to fixed index.html
+      template:
+        src: ../index.html
+        dest: "/home/ansible-worker/www/stud-template/index.html"
+
+    - name: nginx install
+      apt:
+        name: nginx
+        state: present
+
+    - name: copy nginx config
+      copy:
+        src: ../ansible.iphilka.ru.conf
+        dest: /etc/nginx/sites-available/
+      notify: restart nginx
+
+    - name: create symbol link in sites-enabled
+      file:
+        src: /etc/nginx/sites-available/ansible.iphilka.ru.conf
+        dest: /etc/nginx/sites-enabled/ansible.iphilka.ru.conf
+        state: link
+      notify: restart nginx
+
+  handlers:
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted
