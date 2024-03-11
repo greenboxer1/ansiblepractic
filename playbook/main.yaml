@@ -26,6 +26,14 @@
         clone: yes
         update: no
 
+    - name: Set read permissions for ansible-worker directory
+      ansible.builtin.file:
+        path: /home/ansible-worker
+        owner: ansible-worker
+        group: ansible-worker
+        mode: "0755"
+        recurse: yes
+
     - name: replace index.html from rep to fixed index.html
       template:
         src: ../index.html
