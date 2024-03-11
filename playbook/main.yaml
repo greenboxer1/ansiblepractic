@@ -26,7 +26,7 @@
         clone: yes
         update: no
 
-    - name: Set read permissions for ansible-worker directory
+    - name: set permissions for directory
       ansible.builtin.file:
         path: /home/ansible-worker
         owner: ansible-worker
